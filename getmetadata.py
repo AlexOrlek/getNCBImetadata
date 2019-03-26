@@ -28,9 +28,9 @@ args = parser.parse_args()
 outputpath=os.path.relpath(args.out, cwdir)
 
 if args.accessiontype=='nucleotide':
-    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
+    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
 elif args.accessiontype=='biosample':
-    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
+    runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
 else:
     print('invalid accession type')
     sys.exit()
