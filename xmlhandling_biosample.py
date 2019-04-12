@@ -85,9 +85,13 @@ for biosample in root:
     if len(orgnames)==0:
         orgnames.append('-')
     ###extract contact details
+    owners=[]
     emails=[]
     firstnames=[]
     lastnames=[]
+    owner=biosample.find('.//Owner/Name')
+    if owner!=None:
+        owners.append(mystrip(owner.text))
     contact=biosample.find('.//Owner/Contacts/Contact')
     if contact!=None:
         if 'email' in contact.attrib:
@@ -98,6 +102,8 @@ for biosample in root:
             firstnames.append(mystrip(firstname.text))
         if lastname!=None:
             lastnames.append(mystrip(lastname.text))
+    if len(owners)==0:
+        owners.append('-')
     if len(emails)==0:
         emails.append('-')
     if len(firstnames)==0:
@@ -150,7 +156,7 @@ for biosample in root:
     if len(environments)==0:
         environments.append('-')
 #17
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(environments))
+    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(environments))
     #print accession
     #print models[0], packages[0]
     #print '; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames)

@@ -13,7 +13,7 @@ accessions=($(cut -f 1 "$file"))
 
 mkdir -p "${outdir}"
 > "${outdir}/biosamplemetadata.tsv"
-echo -e "Accession\tModel\tPackage\tDescription\tTaxonomyID\tTaxonomyName\tOrganismName\tContactEmail\tContactFirstName\tContactLastName\tCollectionDate\tHost\tIsolationSource\tSampleType\tGeographicLocation\tLatitudeLongitude\tBroadScaleEnvironmentalContext" >> "${outdir}/biosamplemetadata.tsv"
+echo -e "Accession\tModel\tPackage\tDescription\tTaxonomyID\tTaxonomyName\tOrganismName\tAffiliationName\tContactEmail\tContactFirstName\tContactLastName\tCollectionDate\tHost\tIsolationSource\tSampleType\tGeographicLocation\tLatitudeLongitude\tBroadScaleEnvironmentalContext" >> "${outdir}/biosamplemetadata.tsv"
 
 #rm -f testbiosample.xml
 
