@@ -117,7 +117,9 @@ for biosample in root:
     sampletypes=[]
     locations=[]
     latlons=[]
-    environments=[]
+    broadenvironments=[]
+    localenvironments=[]
+    environmentalmediums=[]
     output=biosample.iterfind('.//Attributes')
     for indx, out in enumerate(output):
         try:
@@ -126,21 +128,41 @@ for biosample in root:
             continue
         for label in labels:
             labelattrib=label.attrib
-            if 'attribute_name' in labelattrib:
-                if labelattrib['attribute_name']=='collection_date':
+            # if 'attribute_name' in labelattrib:
+            #     if labelattrib['attribute_name']=='collection_date':
+            #         dates.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='host':
+            #         hosts.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='isolation_source':
+            #         sources.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='sample_type':
+            #         sampletypes.append(mystrip(label.text))                
+            #     if labelattrib['attribute_name']=='geo_loc_name':
+            #         locations.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='lat_lon':
+            #         latlons.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='env_biome': #broad-scale environmental context
+            #         broadenvironments.append(mystrip(label.text))
+            if 'harmonized_name' in labelattrib:
+                if labelattrib['harmonized_name']=='collection_date':
                     dates.append(mystrip(label.text))
-                if labelattrib['attribute_name']=='host':
+                if labelattrib['harmonized_name']=='host':
                     hosts.append(mystrip(label.text))
-                if labelattrib['attribute_name']=='isolation_source':
+                if labelattrib['harmonized_name']=='isolation_source':
                     sources.append(mystrip(label.text))
-                if labelattrib['attribute_name']=='sample_type':
+                if labelattrib['harmonized_name']=='sample_type':
                     sampletypes.append(mystrip(label.text))                
-                if labelattrib['attribute_name']=='geo_loc_name':
+                if labelattrib['harmonized_name']=='geo_loc_name':
                     locations.append(mystrip(label.text))
-                if labelattrib['attribute_name']=='lat_lon':
+                if labelattrib['harmonized_name']=='lat_lon':
                     latlons.append(mystrip(label.text))
-                if labelattrib['attribute_name']=='env_biome': #broad-scale environmental context
-                    environments.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='env_broad_scale': #broad-scale environmental context
+                    broadenvironments.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='env_local_scale': #local-scale environmental context
+                    localenvironments.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='env_medium': #environmental medium
+                    environmentalmediums.append(mystrip(label.text))
+
     if len(dates)==0:
         dates.append('-')
     if len(hosts)==0:
@@ -153,10 +175,14 @@ for biosample in root:
         locations.append('-')
     if len(latlons)==0:
         latlons.append('-')
-    if len(environments)==0:
-        environments.append('-')
+    if len(broadenvironments)==0:
+        broadenvironments.append('-')
+    if len(localenvironments)==0:
+        localenvironments.append('-')
+    if len(environmentalmediums)==0:
+        environmentalmediums.append('-')
 #17
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(environments))
+    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums))
     #print accession
     #print models[0], packages[0]
     #print '; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames)
