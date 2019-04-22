@@ -64,8 +64,11 @@ for seqset in root:
             accessionversion=a.text+'.'+v.text
             if accessionversion in accessions:
                 accession=accessionversion
-                includedaccessions.append(accession)
-                break
+                if accession in includedaccessions: #avoid adding duplicated records
+                    continue
+                else:
+                    includedaccessions.append(accession)
+                    break
 
         if accession==None:
             #print 'Error: accession missing'

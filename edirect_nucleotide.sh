@@ -30,16 +30,20 @@ do
 	echo $i
 	chunklen=$(( $chunklen + 1 ))
 	chunkedaccessions=${accessions[@]:$i:$chunklen} #slice accessions array
+	chunkedaccessionsinput=$(echo $chunkedaccessions | sed 's/ /\n/g')  #converting array to data column to use as epost input
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	#esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
 	break
     else
 	echo $i
 	chunkedaccessions=${accessions[@]:$i:$chunklen} #slice accessions array
+	chunkedaccessionsinput=$(echo $chunkedaccessions | sed 's/ /\n/g')  #converting array to data column to use as epost input
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	#esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
 	sleep 1
     fi
 done
