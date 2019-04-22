@@ -8,6 +8,12 @@ import sys
 UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
 
+accessions=sys.argv[1]
+outdir=sys.argv[2]
+accessions=accessions.split(',') #accession.version
+#accessions=[a.split('.')[0] for a in accessions] #accession
+#sys.exit()
+
 #source='testseqtechxml.xml'
 #source='testseqtechxml_seqtechmissing.xml'
 #source='testxml_seqtechmissing_pubmedlink.xml'
@@ -45,40 +51,25 @@ def mystrip(x, nonehandling='default'):
             sys.exit('accession text is missing from xml file')
     return x
 
+f2=open('%s/missingaccessions.txt'%outdir,'a')
+includedaccessions=[]
 for seqset in root:
     for seqentry in seqset:
-        accessiontype=None
-        ###extract refseq accession###
-        accessionnode=seqentry.find('.//Seq-entry_seq/Bioseq/Bioseq_id/Seq-id/Seq-id_other/Textseq-id/Textseq-id_accession')
-        version=seqentry.find('.//Seq-entry_seq/Bioseq/Bioseq_id/Seq-id/Seq-id_other/Textseq-id/Textseq-id_version')
-        if accessionnode !=None:
-            accessiontype='refseq'
-            if version!=None:
-                accession=mystrip(accessionnode.text,nonehandling='accession')+mystrip('.'+version.text,nonehandling='blank')
-            else:
-                accession=mystrip(accessionnode.text,nonehandling='accession')
-        ###extract genbank accession###
-        nodes=seqentry.iterfind('.//Seq-entry_set/Bioseq-set/Bioseq-set_seq-set/Seq-entry/Seq-entry_seq/Bioseq/Bioseq_id/') #Seq-id/Seq-id_genbank - must be direct path with no children in between
-        for indxa, node in enumerate(nodes): #iterating through seq-id
-            if indxa==0:
-                for subnode in node:
-                    if subnode.tag=='Seq-id_genbank':
-                        #print indxa, node.tag  #Seq-id (must be indx0)
-                        accessionnode=subnode.find('Textseq-id/Textseq-id_accession')
-                        version=subnode.find('Textseq-id/Textseq-id_version')
-                        if accessionnode!=None:
-                            if version!=None:
-                                accessiontype='genbank'
-                                accession=mystrip(accessionnode.text,nonehandling='accession')+mystrip('.'+version.text,nonehandling='blank')
-                            else:
-                                accession=mystrip(accessionnode.text,nonehandling='accession')
-        ###extract data based on accession type###
-        if accessiontype==None:
+        accession=None
+        accessionout=seqentry.iterfind('.//Textseq-id/Textseq-id_accession') #removed Bioseq_descr
+        versionout=seqentry.iterfind('.//Textseq-id/Textseq-id_version') #removed Bioseq_descr
+        for indx, (a,v) in enumerate(zip(accessionout,versionout)):
+            #if indx>0:
+            #    break
+            accessionversion=a.text+'.'+v.text
+            if accessionversion in accessions:
+                accession=accessionversion
+                includedaccessions.append(accession)
+                break
+
+        if accession==None:
             #print 'Error: accession missing'
             continue
-        ###extract refseq data###
-        #if accessiontype=='refseq':
-            #print 'refseq'
 
         #create date
         createdate=[]
@@ -181,6 +172,51 @@ for seqset in root:
         
         #other data requires elink
 
+missingaccessions=list(set(accessions).difference(set(includedaccessions)))
+if len(missingaccessions)>0:
+    for accession in missingaccessions:
+        f2.write('%s\n'%accession)
+f2.close()
+
+
+#OLD CODE - TRYING TO EXTRACT ACCESSION USING FULL PATH
+
+        # accessiontype=None
+        # ###extract refseq accession###
+        # accessionnode=seqentry.find('.//Seq-entry_seq/Bioseq/Bioseq_id/Seq-id/Seq-id_other/Textseq-id/Textseq-id_accession')
+        # version=seqentry.find('.//Seq-entry_seq/Bioseq/Bioseq_id/Seq-id/Seq-id_other/Textseq-id/Textseq-id_version')
+        # if accessionnode !=None:
+        #     accessiontype='refseq'
+        #     if version!=None:
+        #         accession=mystrip(accessionnode.text,nonehandling='accession')+mystrip('.'+version.text,nonehandling='blank')
+        #     else:
+        #         accession=mystrip(accessionnode.text,nonehandling='accession')
+        # ###extract genbank accession###
+        # nodes=seqentry.iterfind('.//Seq-entry_set/Bioseq-set/Bioseq-set_seq-set/Seq-entry/Seq-entry_seq/Bioseq/Bioseq_id/') #Seq-id/Seq-id_genbank - must be direct path with no children in between
+        # for indxa, node in enumerate(nodes): #iterating through seq-id
+        #     if indxa==0:
+        #         for subnode in node:
+        #             if subnode.tag=='Seq-id_genbank':
+        #                 #print indxa, node.tag  #Seq-id (must be indx0)
+        #                 accessionnode=subnode.find('Textseq-id/Textseq-id_accession')
+        #                 version=subnode.find('Textseq-id/Textseq-id_version')
+        #                 if accessionnode!=None:
+        #                     if version!=None:
+        #                         accessiontype='genbank'
+        #                         accession=mystrip(accessionnode.text,nonehandling='accession')+mystrip('.'+version.text,nonehandling='blank')
+        #                     else:
+        #                         accession=mystrip(accessionnode.text,nonehandling='accession')
+        # ###extract data based on accession type###
+        # if accessiontype==None:
+        #     #print 'Error: accession missing'
+        #     continue
+        # ###extract refseq data###
+        # #if accessiontype=='refseq':
+        #     #print 'refseq'
+
+
+
+        
 
 #TESTING
 

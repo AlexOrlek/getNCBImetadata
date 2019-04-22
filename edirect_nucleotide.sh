@@ -13,6 +13,7 @@ accessions=($(cut -f 1 "$file"))
 
 mkdir -p "${outdir}"
 > "${outdir}/nucleotidemetadata.tsv"
+> "${outdir}/missingaccessions.txt"
 echo -e "Accession\tCreateDate\tSequencingTechnology\tAssemblyMethod\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tAssemblyAccession\tPubmedID" >> "${outdir}/nucleotidemetadata.tsv"
 
 len=${#accessions[@]}
@@ -31,14 +32,14 @@ do
 	chunkedaccessions=${accessions[@]:$i:$chunklen} #slice accessions array
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py >> "${outdir}/nucleotidemetadata.tsv"
+	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
 	break
     else
 	echo $i
 	chunkedaccessions=${accessions[@]:$i:$chunklen} #slice accessions array
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py >> "${outdir}/nucleotidemetadata.tsv"
+	esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
 	sleep 1
     fi
 done
