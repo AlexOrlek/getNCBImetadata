@@ -24,11 +24,49 @@ parser.add_argument('-t','--accessiontype', help='Type of accession (either nucl
 parser.add_argument('-o','--out', help='Output directory (required)', required=True, type=str)
 parser.add_argument('-b','--batchsize', help='Number of accession metadata records to retrieve per edirect query (default: 100; min: 2; max: 100)', default=100, type=batchsizeint)
 parser.add_argument('-e','--emailaddress', help="User's email address which will be provided as an argument to edirect econtact -email", required=True, type=str)
+#parser.add_argument('--noaccessionversions', action='store_true', help='If flag provided, this specifies that input accessions do not include the .version suffix (default: input accessions must be in the formataccession.version')
+
 args = parser.parse_args()
 outputpath=os.path.relpath(args.out, cwdir)
 
+#check that multiple accessions are provided
+counter=0
+with open(args.accessions) as f:
+    for indx, line in enumerate(f):
+        counter=counter+1
+        if indx>1:
+            break
+if counter<2:
+    print('Error: multiple accessions must be provided')
+    sys.exit()
+
+
+#if nucleotide input, check whether accessions are in format accession or accession.version; check all accessions in same format
 if args.accessiontype=='nucleotide':
-    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
+    with open(args.accessions) as f:
+        for indx, line in enumerate(f):
+            accession=line.strip().split('\t')[0]
+            if indx==0:
+                accession=accession.split('.')
+                accessionlen=len(accession)
+                continue
+            accession=accession.split('.')
+            if len(accession)!=accessionlen:
+                print('Error: accessions are not a consistent format; all accessions must be in either "accession" or "accession.version" format')
+                sys.exit()
+
+    if accessionlen==1:
+        accessiontype='accession'
+    elif accessionlen==2:
+        accessiontype='accessionversion'
+    else:
+        print('Error: unknown accession format')
+        sys.exit()
+
+    
+            
+if args.accessiontype=='nucleotide':
+    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
 elif args.accessiontype=='biosample':
     runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
 else:

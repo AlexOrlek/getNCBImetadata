@@ -1,5 +1,3 @@
-#import sys, re
-#data = sys.stdin.read()
 from sys import stdin
 import xml.etree.cElementTree as etree
 import codecs
@@ -10,84 +8,40 @@ sys.stdout = UTF8Writer(sys.stdout)
 
 accessions=sys.argv[1]
 outdir=sys.argv[2]
-accessions=accessions.split(',') #accession.version
-#accessions=[a.split('.')[0] for a in accessions] #accession
-#sys.exit()
+accessions=accessions.split(',') #accession.version or accession
+accessiontype=sys.argv[3] #accession or accessionversion
 
-#source='testseqtechxml.xml'
-#source='testseqtechxml_seqtechmissing.xml'
-#source='testxml_seqtechmissing_pubmedlink.xml'
-#source=data
-#tree=etree.parse(source)
+
 tree=etree.parse(stdin)
 root=tree.getroot()
 assert root.tag=='Bioseq-set', "xml is of type %s rather than of type Bioseq-set: make sure multiple accessions are efetched" %root.tag
-# def count_nodes(element, tagname):
-#     """Return the number of tagname nodes in the tree rooted at element"""
-#     count = 0
-#     for node in element.getiterator(tagname):
-#         count += 1
-#     return count
 
-#Mycount=count_nodes(tree, 'Seq-entry') #6
-#print mycount
 
-#!!findall should be replaced by finditer wherever for loop is used on output
-#! get accession version and append to accession
-
-#print root,'root' #<Element 'Bioseq-set' at 0x7f6314f1e3f0> root
-#accessions_refseq=[]
-#accessions_genbank=[]
-
-def mystrip(x, nonehandling='default'):
-    if x!=None:
-        x=x.strip()
-    else:
-        if nonehandling=='default':
-            x='-'
-        if nonehandling=='blank':
-            x=''
-        if nonehandling=='accession':
-            sys.exit('accession text is missing from xml file')
-    return x
 
 f2=open('%s/missingaccessions.txt'%outdir,'a')
 includedaccessions=[]
 for seqset in root:
-    for seqentry in seqset:
-        accession=None
-        accessionout=seqentry.iterfind('.//Textseq-id/Textseq-id_accession') #removed Bioseq_descr
-        versionout=seqentry.iterfind('.//Textseq-id/Textseq-id_version') #removed Bioseq_descr
-        for indx, (a,v) in enumerate(zip(accessionout,versionout)):
-            #if indx>0:
-            #    break
-            accessionversion=a.text+'.'+v.text
-            if accessionversion in accessions:
-                accession=accessionversion
-                if accession in includedaccessions: #avoid adding duplicated records
-                    continue
-                else:
-                    includedaccessions.append(accession)
-                    break
-
-        if accession==None:
-            #print 'Error: accession missing'
+    for seqentry in seqset.iter('Seq-entry'): #using .iter to find all seq-entry elements; .iterfind only finds child nodes not all nodes
+        accessionout=seqentry.find('.//Textseq-id/Textseq-id_accession')
+        versionout=seqentry.find('.//Textseq-id/Textseq-id_version')
+        if accessionout==None or versionout==None:
             continue
-
-        #create date
-        createdate=[]
-        output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_create-date/Date/Date_std/Date-std') #removed Bioseq_descr
-        for indx, out in enumerate(output):
-            if indx>0:
-                break
-            year=mystrip(out.find('./Date-std_year').text)
-            month=mystrip(out.find('./Date-std_month').text)
-            day=mystrip(out.find('./Date-std_day').text)
-            date=day+'-'+month+'-'+year
-            createdate=date
-        if len(createdate)==0:
-            createdate='-'
-        #print createdate
+        accession=accessionout.text
+        accessionversion=accessionout.text+'.'+versionout.text
+        if accessiontype=='accessionversion':
+            if accessionversion not in accessions:
+                continue
+            elif accessionversion in includedaccessions:
+                continue
+            else:
+                includedaccessions.append(accessionversion)
+        else: #accession only
+            if accession not in accessions:
+                continue
+            elif accession in includedaccessions:
+                continue
+            else:
+                includedaccessions.append(accession)
         
         #get seqtech, assembly method; annotation methods; biosample/bioproject/assembly accession
         seqtechs=[]
@@ -98,33 +52,33 @@ for seqset in root:
         biosamples=[]
         bioprojects=[]
         assemblys=[]
-        output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_user/User-object/User-object_data/User-field') #removed Bioseq_descr
+        output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_user/User-object/User-object_data/User-field')
         for indx, out in enumerate(output):
             try:
-                label=out.find('./User-field_label/Object-id/Object-id_str').text.strip()
+                label=out.find('./User-field_label/Object-id/Object-id_str').text
             except:
                 continue
             #get sequencing/assembly/annotation method data
             if label=='Sequencing Technology':
                 seqtech=out.find('./User-field_data/User-field_data_str')
                 if seqtech!=None:
-                    seqtechs.append(mystrip(seqtech.text))
+                    seqtechs.append(seqtech.text)
             if label=='Assembly Method':
                 assemblymethod=out.find('./User-field_data/User-field_data_str')
                 if assemblymethod!=None:
-                    assemblymethods.append(mystrip(assemblymethod.text))
+                    assemblymethods.append(assemblymethod.text)
             if label=='Annotation Pipeline':
                 annotationpipeline=out.find('./User-field_data/User-field_data_str')
                 if annotationpipeline!=None:
-                    annotationpipelines.append(mystrip(annotationpipeline.text))
+                    annotationpipelines.append(annotationpipeline.text)
             if label=='Annotation Software revision':
                 annotationversion=out.find('./User-field_data/User-field_data_str')
                 if annotationversion!=None:
-                    annotationversions.append(mystrip(annotationversion.text))
+                    annotationversions.append(annotationversion.text)
             if label=='Annotation Method':
                 annotationmethod=out.find('./User-field_data/User-field_data_str')
                 if annotationmethod!=None:
-                    annotationmethods.append(mystrip(annotationmethod.text))
+                    annotationmethods.append(annotationmethod.text)
                     
             #get bioproject/biosample/assembly database accessions
             if label=='BioProject':
@@ -139,6 +93,7 @@ for seqset in root:
                 assembly=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if assembly!=None:
                     assemblys.append(assembly.text)
+            
             
         if len(seqtechs)==0:
             seqtechs.append('-')
@@ -156,30 +111,62 @@ for seqset in root:
             bioprojects.append('-')
         if len(assemblys)==0:
             assemblys.append('-')
-        #print '; '.join(seqtechs), bioprojects[0], biosamples[0], assemblys[0] #allowing for multiple seqtech entries
 
         #pubmed link/title (could also get more details about annotatoin and assembly methods but probably not necessary)
         pmids=[]
-        output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_pub/Pubdesc/Pubdesc_pub/Pub-equiv/Pub/Pub_pmid') #removed Bioseq_descr
-        for indx, out in enumerate(output):
-            pmid=mystrip(out.find('./PubMedId').text)
-            pmid='https://www.ncbi.nlm.nih.gov/pubmed/'+pmid
-            pmids.append(pmid)
-            
+        output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_pub/Pubdesc/Pubdesc_pub/Pub-equiv/Pub/Pub_pmid')
+        if output!=None:
+            for indx, out in enumerate(output):
+                pmid=out.find('./PubMedId')
+                if pmid!=None:
+                    pmid=pmid.text
+                    pmid='https://www.ncbi.nlm.nih.gov/pubmed/'+pmid
+                    pmids.append(pmid)    
         if len(pmids)==0:
-            pmids.append('-')
-        #print '; '.join(pmids) #allowing for multiple pubmed ids
-            
+            pmids.append('-')           
 
-        print '%s\t%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accession,createdate,'; '.join(seqtechs), ';'.join(assemblymethods),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),mystrip(bioprojects[0]), mystrip(biosamples[0]), mystrip(assemblys[0]),'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry e.g. bioprojects[0] (just want one bioproject accession)
-        
-        #other data requires elink
+        print '%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accessionversion,'; '.join(seqtechs),';'.join(assemblymethods),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),bioprojects[0],biosamples[0],assemblys[0],'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry e.g. bioprojects[0] (just want one bioproject accession)
 
 missingaccessions=list(set(accessions).difference(set(includedaccessions)))
 if len(missingaccessions)>0:
-    for accession in missingaccessions:
-        f2.write('%s\n'%accession)
+    for missingaccession in missingaccessions:
+        f2.write('%s\n'%missingaccession)
 f2.close()
+
+
+
+
+#OLD CODE - extracting fields that can be extracted trivially using edirect -format docsum
+
+        # #create date
+        # out=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_create-date/Date/Date_std/Date-std')
+        # createdate='-'
+        # if out!=None:
+        #     year=out.find('./Date-std_year')
+        #     month=out.find('./Date-std_month')
+        #     day=out.find('./Date-std_day')
+        #     if year!=None and month!=None and day!=None:
+        #         createdate=mystrip(day.text)+'-'+mystrip(month.text)+'-'+mystrip(year.text)
+
+        # #Title
+        # out=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_title')
+        # title='-'
+        # if out!=None:
+        #     title=mystrip(out.text)
+
+
+#OLD FUNCTOIN - instead of using mystrip, just make sure the field !=None before trying to get text
+# def mystrip(x, nonehandling='default'):
+#     if x!=None:
+#         x=x.strip()
+#     else:
+#         if nonehandling=='default':
+#             x='-'
+#         if nonehandling=='blank':
+#             x=''
+#         if nonehandling=='accession':
+#             sys.exit('accession text is missing from xml file')
+#     return x
 
 
 #OLD CODE - TRYING TO EXTRACT ACCESSION USING FULL PATH

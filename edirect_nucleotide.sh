@@ -8,13 +8,14 @@ batchsize=${2}
 emailaddress=${3}
 outdir=${4}
 sourcedir=${5}
+accessiontype=${6}
 
 accessions=($(cut -f 1 "$file"))
 
 mkdir -p "${outdir}"
 > "${outdir}/nucleotidemetadata.tsv"
 > "${outdir}/missingaccessions.txt"
-echo -e "Accession\tCreateDate\tSequencingTechnology\tAssemblyMethod\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tAssemblyAccession\tPubmedID" >> "${outdir}/nucleotidemetadata.tsv"
+echo -e "Accession\tSequencingTechnology\tAssemblyMethod\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tAssemblyAccession\tPubmedID" >> "${outdir}/nucleotidemetadata.tsv"
 
 len=${#accessions[@]}
 chunklen=${batchsize}
@@ -34,7 +35,7 @@ do
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
 	#esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
-	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} ${accessiontype} >> "${outdir}/nucleotidemetadata.tsv"
 	break
     else
 	echo $i
@@ -43,7 +44,7 @@ do
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
 	#esearch -db nuccore -query $chunkedaccessionsstring | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
-	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/nucleotidemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db nuccore -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_nucleotide.py ${chunkedaccessionsstring} ${outdir} ${accessiontype} >> "${outdir}/nucleotidemetadata.tsv"
 	sleep 1
     fi
 done
