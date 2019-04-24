@@ -15,7 +15,7 @@ accessions=($(cut -f 1 "$file"))
 mkdir -p "${outdir}"
 > "${outdir}/nucleotidemetadata.tsv"
 > "${outdir}/missingaccessions.txt"
-echo -e "Accession\tSequencingTechnology\tAssemblyMethod\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tAssemblyAccession\tPubmedID" >> "${outdir}/nucleotidemetadata.tsv"
+echo -e "Accession\tSequencingTechnology\tAssemblyMethod\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tAssemblyAccession\tPubMedID" >> "${outdir}/nucleotidemetadata.tsv"
 
 len=${#accessions[@]}
 chunklen=${batchsize}
