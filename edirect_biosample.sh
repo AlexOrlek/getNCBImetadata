@@ -9,18 +9,19 @@ emailaddress=${3}
 outdir=${4}
 sourcedir=${5}
 
+
 accessions=($(cut -f 1 "$file"))
 
 mkdir -p "${outdir}"
 > "${outdir}/biosamplemetadata.tsv"
+> "${outdir}/missingaccessions.txt"
+
 echo -e "Accession\tModel\tPackage\tDescription\tTaxonomyID\tTaxonomyName\tOrganismName\tAffiliationName\tContactEmail\tContactFirstName\tContactLastName\tCollectionDate\tHost\tIsolationSource\tSampleType\tGeographicLocation\tLatitudeLongitude\tBroadScaleEnvironmentalContext\tLocalScaleEnvironmentalContext\tEnvironmentalMedium" >> "${outdir}/biosamplemetadata.tsv"
 
 #rm -f testbiosample.xml
 
-
 len=${#accessions[@]}
 chunklen=${batchsize}
-
 
 
 econtact -email ${emailaddress} -tool biosamplemetadatadownload
@@ -37,7 +38,7 @@ do
 	chunkedaccessionsinput=$(echo $chunkedaccessions | sed 's/ /\n/g')  #converting array to data column to use as epost input
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	echo "$chunkedaccessionsinput" | epost -db biosample -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_biosample.py >> "${outdir}/biosamplemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db biosample -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_biosample.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/biosamplemetadata.tsv"
 	break
     else
 	echo $i
@@ -45,7 +46,7 @@ do
 	chunkedaccessionsinput=$(echo $chunkedaccessions | sed 's/ /\n/g')  #converting array to data column to use as epost input
 	chunkedaccessionsstring=$(echo $chunkedaccessions | sed 's/ /,/g')  #converting array to comma-separated string to use as query
 	#echo $chunkedaccessionsstring
-	echo "$chunkedaccessionsinput" | epost -db biosample -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_biosample.py >> "${outdir}/biosamplemetadata.tsv"
+	echo "$chunkedaccessionsinput" | epost -db biosample -format acc | efetch -format xml | python ${sourcedir}/xmlhandling_biosample.py ${chunkedaccessionsstring} ${outdir} >> "${outdir}/biosamplemetadata.tsv"
 	sleep 1
     fi
 done

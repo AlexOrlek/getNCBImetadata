@@ -6,24 +6,18 @@ import sys
 UTF8Writer = codecs.getwriter('utf8')
 sys.stdout = UTF8Writer(sys.stdout)
 
+accessions=sys.argv[1]
+accessions=accessions.split(',') #biosample accessions
+outdir=sys.argv[2]
+
+
 tree=etree.parse(stdin)
 root=tree.getroot()
 
 assert root.tag=='BioSampleSet', "xml is of type %s rather than of type BioSampleSet: make sure multiple accessions are efetched" %root.tag
 
-# def count_nodes(element, tagname):
-#     """Return the number of tagname nodes in the tree rooted at element"""
-#     count = 0
-#     for node in element.getiterator(tagname):
-#         count += 1
-#     return count
 
-#mycount=count_nodes(tree, 'BioSample')
-#print mycount #6
-
-#print root,'root' #<Element 'BioSampleSet' at 0x7fd30d4fe450>
-
-def mystrip(x, nonehandling='default'):
+def mystrip(x, nonehandling='default'):  
     if x!=None:
         x=x.strip()
     else:
@@ -36,12 +30,20 @@ def mystrip(x, nonehandling='default'):
     return x
 
 
+f2=open('%s/missingaccessions.txt'%outdir,'a')
+includedaccessions=[]
+
+
 for biosample in root:
     accession=None
     accessionnode=biosample.find('./Ids/Id[@db="BioSample"][@is_primary="1"]')
     if accessionnode==None:
         continue
     accession=mystrip(accessionnode.text,nonehandling='accession')
+    if accession not in accessions:
+        continue
+    else:
+        includedaccessions.append(accession)
     #print accession
     ##extract model and pacakge
     models=[]
@@ -128,21 +130,6 @@ for biosample in root:
             continue
         for label in labels:
             labelattrib=label.attrib
-            # if 'attribute_name' in labelattrib:
-            #     if labelattrib['attribute_name']=='collection_date':
-            #         dates.append(mystrip(label.text))
-            #     if labelattrib['attribute_name']=='host':
-            #         hosts.append(mystrip(label.text))
-            #     if labelattrib['attribute_name']=='isolation_source':
-            #         sources.append(mystrip(label.text))
-            #     if labelattrib['attribute_name']=='sample_type':
-            #         sampletypes.append(mystrip(label.text))                
-            #     if labelattrib['attribute_name']=='geo_loc_name':
-            #         locations.append(mystrip(label.text))
-            #     if labelattrib['attribute_name']=='lat_lon':
-            #         latlons.append(mystrip(label.text))
-            #     if labelattrib['attribute_name']=='env_biome': #broad-scale environmental context
-            #         broadenvironments.append(mystrip(label.text))
             if 'harmonized_name' in labelattrib:
                 if labelattrib['harmonized_name']=='collection_date':
                     dates.append(mystrip(label.text))
@@ -183,6 +170,40 @@ for biosample in root:
         environmentalmediums.append('-')
 #17
     print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums))
+
+
+#write missing accessions to file
+
+missingaccessions=list(set(accessions).difference(set(includedaccessions)))
+if len(missingaccessions)>0:
+    for missingaccession in missingaccessions:
+        f2.write('%s\n'%missingaccession)
+f2.close()
+
+
+
+
+
+
+#OLD - now using hamronzed name rather than attribute name
+            # if 'attribute_name' in labelattrib:
+            #     if labelattrib['attribute_name']=='collection_date':
+            #         dates.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='host':
+            #         hosts.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='isolation_source':
+            #         sources.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='sample_type':
+            #         sampletypes.append(mystrip(label.text))                
+            #     if labelattrib['attribute_name']=='geo_loc_name':
+            #         locations.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='lat_lon':
+            #         latlons.append(mystrip(label.text))
+            #     if labelattrib['attribute_name']=='env_biome': #broad-scale environmental context
+            #         broadenvironments.append(mystrip(label.text))
+
+#OLD
+
     #print accession
     #print models[0], packages[0]
     #print '; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames)
@@ -312,3 +333,20 @@ for biosample in root:
         
 #         #other data requires elink
 
+
+
+
+#TESTING
+
+#print root,'root' #<Element 'BioSampleSet' at 0x7fd30d4fe450>
+
+
+# def count_nodes(element, tagname):
+#     """Return the number of tagname nodes in the tree rooted at element"""
+#     count = 0
+#     for node in element.getiterator(tagname):
+#         count += 1
+#     return count
+
+#mycount=count_nodes(tree, 'BioSample')
+#print mycount #6
