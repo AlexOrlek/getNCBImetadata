@@ -17,11 +17,23 @@ root=tree.getroot()
 assert root.tag=='Bioseq-set', "xml is of type %s rather than of type Bioseq-set: make sure multiple accessions are efetched" %root.tag
 
 
+def mystrip(x, nonehandling='default'):
+    if x!=None:
+        x=x.strip()
+    else:
+        if nonehandling=='default':
+            x='-'
+        if nonehandling=='blank':
+            x=''
+        if nonehandling=='accession':
+            sys.exit('accession text is missing from xml file')
+    return x
+
 
 f2=open('%s/missingaccessions.txt'%outdir,'a')
 includedaccessions=[]
 for seqset in root:
-    for seqentry in seqset.iter('Seq-entry'): #using .iter to find all seq-entry elements; .iterfind only finds child nodes not all nodes
+    for seqentry in seqset: #only iterating through outer nest - most accessions will be extracted but some may be nested within the xml
         accessionout=seqentry.find('.//Textseq-id/Textseq-id_accession')
         versionout=seqentry.find('.//Textseq-id/Textseq-id_version')
         if accessionout==None or versionout==None:
@@ -62,37 +74,37 @@ for seqset in root:
             if label=='Sequencing Technology':
                 seqtech=out.find('./User-field_data/User-field_data_str')
                 if seqtech!=None:
-                    seqtechs.append(seqtech.text)
+                    seqtechs.append(mystrip(seqtech.text))
             if label=='Assembly Method':
                 assemblymethod=out.find('./User-field_data/User-field_data_str')
                 if assemblymethod!=None:
-                    assemblymethods.append(assemblymethod.text)
+                    assemblymethods.append(mystrip(assemblymethod.text))
             if label=='Annotation Pipeline':
                 annotationpipeline=out.find('./User-field_data/User-field_data_str')
                 if annotationpipeline!=None:
-                    annotationpipelines.append(annotationpipeline.text)
+                    annotationpipelines.append(mystrip(annotationpipeline.text))
             if label=='Annotation Software revision':
                 annotationversion=out.find('./User-field_data/User-field_data_str')
                 if annotationversion!=None:
-                    annotationversions.append(annotationversion.text)
+                    annotationversions.append(mystrip(annotationversion.text))
             if label=='Annotation Method':
                 annotationmethod=out.find('./User-field_data/User-field_data_str')
                 if annotationmethod!=None:
-                    annotationmethods.append(annotationmethod.text)
+                    annotationmethods.append(mystrip(annotationmethod.text))
                     
             #get bioproject/biosample/assembly database accessions
             if label=='BioProject':
                 bioproject=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if bioproject!=None:
-                    bioprojects.append(bioproject.text)
+                    bioprojects.append(mystrip(bioproject.text))
             if label=='BioSample':
                 biosample=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if biosample!=None:
-                    biosamples.append(biosample.text)
+                    biosamples.append(mystrip(biosample.text))
             if label=='Assembly':
                 assembly=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if assembly!=None:
-                    assemblys.append(assembly.text)
+                    assemblys.append(mystrip(assembly.text))
             
             
         if len(seqtechs)==0:
@@ -120,8 +132,9 @@ for seqset in root:
                 pmid=out.find('./PubMedId')
                 if pmid!=None:
                     pmid=pmid.text
-                    pmid='https://www.ncbi.nlm.nih.gov/pubmed/'+pmid
-                    pmids.append(pmid)    
+                    if pmid!=None:
+                        pmid='https://www.ncbi.nlm.nih.gov/pubmed/'+pmid.strip()
+                        pmids.append(pmid)    
         if len(pmids)==0:
             pmids.append('-')           
 
@@ -154,19 +167,6 @@ f2.close()
         # if out!=None:
         #     title=mystrip(out.text)
 
-
-#OLD FUNCTOIN - instead of using mystrip, just make sure the field !=None before trying to get text
-# def mystrip(x, nonehandling='default'):
-#     if x!=None:
-#         x=x.strip()
-#     else:
-#         if nonehandling=='default':
-#             x='-'
-#         if nonehandling=='blank':
-#             x=''
-#         if nonehandling=='accession':
-#             sys.exit('accession text is missing from xml file')
-#     return x
 
 
 #OLD CODE - TRYING TO EXTRACT ACCESSION USING FULL PATH
