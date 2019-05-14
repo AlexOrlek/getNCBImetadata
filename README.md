@@ -43,9 +43,13 @@ __Nucleotide metadata__
 
 When nucleotide accessions are provided, the following fields are extracted:
 * `AccessionVersion`
-* Genome assembly data: `Sequencing Technology`, `Assembly Method`
+* `Description`
+* Dates of first submission and last update: `Create Date`, `Update Date`
+* Molecular characteristics: `Molecule Type` (e.g. dna), `Length`, `Topology`, `Completeness`, `Source Genome Type` (e.g. plasmid)
+* Taxonomy data: `Source Taxon`, `Source Taxonomic ID`
+* Genome assembly data: `Assembly Method`, `Genome Coverage`, `Sequencing Technology`
 * Genome annotation data: `Annotation Pipeline`, `Annotation Method`
-* DBLink data: `Bioproject Accession`, `Biosample Accession`, `Assembly Accession`
+* DBLink data: `Bioproject Accession`, `Biosample Accession`, `Sequence Read Archive Accession`, `Assembly Accession`
 * `PubMedID`<br>
 
 

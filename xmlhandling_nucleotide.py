@@ -181,31 +181,31 @@ for seqset in root:
         length='-'
         topology='-'
         if output!=None:
-            moleculetype=output.find('./Seq-inst_mol').attrib['value']
-            if moleculetype!=None:
-                moleculetype=mystrip(moleculetype)
-            length=output.find('./Seq-inst_length')
-            if length!=None:
-                length=mystrip(length.text)
-            topology=output.find('./Seq-inst_topology').attrib['value']
-            if topology!=None:
-                topology=mystrip(topology)
+            out=output.find('./Seq-inst_mol')
+            if out!=None:
+                moleculetype=mystrip(out.attrib['value'])
+            out=output.find('./Seq-inst_length')
+            if out!=None:
+                length=mystrip(out.text)
+            out=output.find('./Seq-inst_topology')
+            if out!=None:
+                topology=mystrip(out.attrib['value'])
         #completeness
         completeness='-'
         output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_molinfo/MolInfo')
         if output!=None:
-            out=output.find('./MolInfo_completeness').attrib['value']
+            out=output.find('./MolInfo_completeness')
             if out!=None:
-                completeness=mystrip(out)
+                completeness=mystrip(out.attrib['value'])
         #source organism/source molecule
         sourcegenome='-'
         sourcetaxon='-'
         sourcetaxid='-'
         output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_source/BioSource')
         if output!=None:
-            out=output.find('./BioSource_genome').attrib['value']
+            out=output.find('./BioSource_genome')
             if out!=None:
-                sourcegenome=mystrip(out)
+                sourcegenome=mystrip(out.attrib['value'])
             out=output.find('./BioSource_org/Org-ref/Org-ref_taxname')
             if out!=None:
                 sourcetaxon=mystrip(out.text)
@@ -222,6 +222,9 @@ if len(missingaccessions)>0:
 f2.close()
 
 
+#OLD CODE
+#moleculetype=output.find('./Seq-inst_mol').attrib['value'] #NoneType has no attribute
+            
 #NOTES
 #added fields:
 #sras title createdate updatedate moleculetype length topology completeness sourcegenome sourcetaxon sourcetaxid
