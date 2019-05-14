@@ -138,7 +138,7 @@ for seqset in root:
         if len(sras)==0:
             sras.append('-')
 
-        #pubmed links/title/createdate/updatedate/moleculetype/length/topology/completeness/source organism/source molecule
+        #pubmed links/createdate/updatedate/moleculetype/length/completeness/source organism/source molecule
         #pubmedlinks
         pmids=[]
         output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_pub/Pubdesc/Pubdesc_pub/Pub-equiv/Pub/Pub_pmid')
@@ -152,11 +152,6 @@ for seqset in root:
                         pmids.append(pmid)
         if len(pmids)==0:
             pmids.append('-')           
-        #Title
-        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_title')
-        title='-'
-        if output!=None:
-            title=mystrip(output.text)
         #createdate
         output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_create-date/Date/Date_std/Date-std')
         createdate='-'
@@ -175,7 +170,7 @@ for seqset in root:
             day=output.find('./Date-std_day')
             if year!=None and month!=None and day!=None:
                 updatedate=mystrip(year.text)+'-'+mystrip(month.text)+'-'+mystrip(day.text)
-        #moleculetype/length/topology
+        #moleculetype/length
         output=seqentry.find('.//Bioseq_inst/Seq-inst')
         moleculetype='-'
         length='-'
@@ -187,9 +182,6 @@ for seqset in root:
             out=output.find('./Seq-inst_length')
             if out!=None:
                 length=mystrip(out.text)
-            out=output.find('./Seq-inst_topology')
-            if out!=None:
-                topology=mystrip(out.attrib['value'])
         #completeness
         completeness='-'
         output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_molinfo/MolInfo')
@@ -213,7 +205,7 @@ for seqset in root:
             if out!=None:
                 sourcetaxid=mystrip(out.text)
 
-        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accessionversion,title,createdate,updatedate,moleculetype,length,topology,completeness,sourcegenome,sourcetaxon,sourcetaxid,';'.join(assemblymethods),';'.join(coverages),'; '.join(seqtechs),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),';'.join(bioprojects),';'.join(biosamples),';'.join(sras),';'.join(assemblys),'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry (title)
+        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accessionversion,createdate,updatedate,moleculetype,length,completeness,sourcegenome,sourcetaxon,sourcetaxid,';'.join(assemblymethods),';'.join(coverages),'; '.join(seqtechs),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),';'.join(bioprojects),';'.join(biosamples),';'.join(sras),';'.join(assemblys),'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry (title)
 
 missingaccessions=list(set(accessions).difference(set(includedaccessions)))
 if len(missingaccessions)>0:
@@ -221,6 +213,17 @@ if len(missingaccessions)>0:
         f2.write('%s\n'%missingaccession)
 f2.close()
 
+
+#OLD CODE - title and topology (for topolgy: ~600 instances of ~16000) are occasionally absent from xml; use docsum output format instead to extract title
+            #out=output.find('./Seq-inst_topology')
+            #if out!=None:
+            #    topology=mystrip(out.attrib['value'])
+
+        # #Title
+        # output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_title')
+        # title='-'
+        # if output!=None:
+        #     title=mystrip(output.text)
 
 #OLD CODE
 #moleculetype=output.find('./Seq-inst_mol').attrib['value'] #NoneType has no attribute
