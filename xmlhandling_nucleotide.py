@@ -57,6 +57,7 @@ for seqset in root:
         
         #get seqtech, assembly method; annotation methods; biosample/bioproject/assembly accession
         seqtechs=[]
+        coverages=[]
         assemblymethods=[]
         annotationpipelines=[] #there is info on pipeline (e.g ncbi prokaryotic...) and software version of this pipeline e.g. 4.6
         annotationversions=[] #e.g. 4.6
@@ -64,6 +65,7 @@ for seqset in root:
         biosamples=[]
         bioprojects=[]
         assemblys=[]
+        sras=[]
         output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_user/User-object/User-object_data/User-field')
         for indx, out in enumerate(output):
             try:
@@ -75,6 +77,10 @@ for seqset in root:
                 seqtech=out.find('./User-field_data/User-field_data_str')
                 if seqtech!=None:
                     seqtechs.append(mystrip(seqtech.text))
+            if label=='Genome Coverage':
+                coverage=out.find('./User-field_data/User-field_data_str')
+                if coverage!=None:
+                    coverages.append(mystrip(coverage.text))
             if label=='Assembly Method':
                 assemblymethod=out.find('./User-field_data/User-field_data_str')
                 if assemblymethod!=None:
@@ -92,7 +98,7 @@ for seqset in root:
                 if annotationmethod!=None:
                     annotationmethods.append(mystrip(annotationmethod.text))
                     
-            #get bioproject/biosample/assembly database accessions
+            #get bioproject/biosample/assembly/SRA database accessions
             if label=='BioProject':
                 bioproject=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if bioproject!=None:
@@ -105,10 +111,16 @@ for seqset in root:
                 assembly=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
                 if assembly!=None:
                     assemblys.append(mystrip(assembly.text))
+            if label=='Sequence Read Archive':
+                sra=out.find('./User-field_data/User-field_data_strs/User-field_data_strs_E')
+                if sra!=None:
+                    sras.append(mystrip(sra.text))
             
             
         if len(seqtechs)==0:
             seqtechs.append('-')
+        if len(coverages)==0:
+            coverages.append('-')
         if len(assemblymethods)==0:
             assemblymethods.append('-')
         if len(annotationpipelines)==0:
@@ -123,8 +135,11 @@ for seqset in root:
             bioprojects.append('-')
         if len(assemblys)==0:
             assemblys.append('-')
+        if len(sras)==0:
+            sras.append('-')
 
-        #pubmed link/title (could also get more details about annotatoin and assembly methods but probably not necessary)
+        #pubmed links/title/createdate/updatedate/moleculetype/length/topology/completeness/source organism/source molecule
+        #pubmedlinks
         pmids=[]
         output=seqentry.iterfind('.//Seq-descr/Seqdesc/Seqdesc_pub/Pubdesc/Pubdesc_pub/Pub-equiv/Pub/Pub_pmid')
         if output!=None:
@@ -134,11 +149,71 @@ for seqset in root:
                     pmid=pmid.text
                     if pmid!=None:
                         pmid='https://www.ncbi.nlm.nih.gov/pubmed/'+pmid.strip()
-                        pmids.append(pmid)    
+                        pmids.append(pmid)
         if len(pmids)==0:
             pmids.append('-')           
+        #Title
+        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_title')
+        title='-'
+        if output!=None:
+            title=mystrip(output.text)
+        #createdate
+        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_create-date/Date/Date_std/Date-std')
+        createdate='-'
+        if output!=None:
+            year=output.find('./Date-std_year')
+            month=output.find('./Date-std_month')
+            day=output.find('./Date-std_day')
+            if year!=None and month!=None and day!=None:
+                createdate=mystrip(year.text)+'-'+mystrip(month.text)+'-'+mystrip(day.text)
+        #updatedate
+        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_update-date/Date/Date_std/Date-std')
+        updatedate='-'
+        if output!=None:
+            year=output.find('./Date-std_year')
+            month=output.find('./Date-std_month')
+            day=output.find('./Date-std_day')
+            if year!=None and month!=None and day!=None:
+                updatedate=mystrip(year.text)+'-'+mystrip(month.text)+'-'+mystrip(day.text)
+        #moleculetype/length/topology
+        output=seqentry.find('.//Bioseq_inst/Seq-inst')
+        moleculetype='-'
+        length='-'
+        topology='-'
+        if output!=None:
+            moleculetype=output.find('./Seq-inst_mol').attrib['value']
+            if moleculetype!=None:
+                moleculetype=mystrip(moleculetype)
+            length=output.find('./Seq-inst_length')
+            if length!=None:
+                length=mystrip(length.text)
+            topology=output.find('./Seq-inst_topology').attrib['value']
+            if topology!=None:
+                topology=mystrip(topology)
+        #completeness
+        completeness='-'
+        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_molinfo/MolInfo')
+        if output!=None:
+            out=output.find('./MolInfo_completeness').attrib['value']
+            if out!=None:
+                completeness=mystrip(out)
+        #source organism/source molecule
+        sourcegenome='-'
+        sourcetaxon='-'
+        sourcetaxid='-'
+        output=seqentry.find('.//Seq-descr/Seqdesc/Seqdesc_source/BioSource')
+        if output!=None:
+            out=output.find('./BioSource_genome').attrib['value']
+            if out!=None:
+                sourcegenome=mystrip(out)
+            out=output.find('./BioSource_org/Org-ref/Org-ref_taxname')
+            if out!=None:
+                sourcetaxon=mystrip(out.text)
+            out=output.find('./BioSource_org/Org-ref/Org-ref_db/Dbtag/Dbtag_tag/Object-id/Object-id_id')
+            if out!=None:
+                sourcetaxid=mystrip(out.text)
 
-        print '%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accessionversion,'; '.join(seqtechs),';'.join(assemblymethods),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),bioprojects[0],biosamples[0],assemblys[0],'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry e.g. bioprojects[0] (just want one bioproject accession)
+        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s|%s\t%s\t%s\t%s\t%s\t%s'%(accessionversion,title,createdate,updatedate,moleculetype,length,topology,completeness,sourcegenome,sourcetaxon,sourcetaxid,';'.join(assemblymethods),';'.join(coverages),'; '.join(seqtechs),';'.join(annotationpipelines),';'.join(annotationversions),';'.join(annotationmethods),';'.join(bioprojects),';'.join(biosamples),';'.join(sras),';'.join(assemblys),'; '.join(pmids))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry (title)
 
 missingaccessions=list(set(accessions).difference(set(includedaccessions)))
 if len(missingaccessions)>0:
@@ -147,7 +222,9 @@ if len(missingaccessions)>0:
 f2.close()
 
 
-
+#NOTES
+#added fields:
+#sras title createdate updatedate moleculetype length topology completeness sourcegenome sourcetaxon sourcetaxid
 
 #OLD CODE - extracting fields that can be extracted trivially using edirect -format docsum
 
