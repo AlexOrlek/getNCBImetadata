@@ -45,6 +45,12 @@ for biosample in root:
     else:
         includedaccessions.append(accession)
     #print accession
+    #get sample name (under identifier tag) (there may also be sample name provided as attribute - see below)
+    samplenamenode=biosample.find('./Ids/Id[@db_label="Sample name"]')
+    if samplenamenode!=None:
+        samplenameidentifier=mystrip(samplenamenode.text)
+    else:
+        samplenameidentifier='-'
     ##extract model and pacakge
     models=[]
     packages=[]
@@ -60,6 +66,7 @@ for biosample in root:
         packages.append('-')
     ##extract description/organism details
     titles=[]
+    comments=[]
     taxids=[]
     taxnames=[]
     orgnames=[]
@@ -68,6 +75,9 @@ for biosample in root:
         title=description.find('./Title')
         if title!=None:
             titles.append(mystrip(title.text))
+        comment=description.find('./Comment/Paragraph')
+        if comment!=None:
+            comments.append(mystrip(comment.text))
         organism=description.find('./Organism')
         if organism!=None:
             orgattrib=organism.attrib
@@ -80,6 +90,8 @@ for biosample in root:
                 orgnames.append(mystrip(orgname.text))
     if len(titles)==0:
         titles.append('-')
+    if len(comments)==0:
+        comments.append('-')
     if len(taxids)==0:
         taxids.append('-')
     if len(taxnames)==0:
@@ -116,12 +128,20 @@ for biosample in root:
     dates=[]
     hosts=[]
     sources=[]
+    samplenames=[]#
+    strains=[]#
     sampletypes=[]
     locations=[]
     latlons=[]
     broadenvironments=[]
     localenvironments=[]
     environmentalmediums=[]
+    projectnames=[]#
+    culturecollections=[]
+    biomaterialproviders=[]
+    biomaterialrefs=[]
+    specimenvouchers=[]
+    refmaterials=[]
     output=biosample.iterfind('.//Attributes')
     for indx, out in enumerate(output):
         try:
@@ -137,6 +157,10 @@ for biosample in root:
                     hosts.append(mystrip(label.text))
                 if labelattrib['harmonized_name']=='isolation_source':
                     sources.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='sample_name':
+                    samplenames.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='strain':
+                    strains.append(mystrip(label.text))
                 if labelattrib['harmonized_name']=='sample_type':
                     sampletypes.append(mystrip(label.text))                
                 if labelattrib['harmonized_name']=='geo_loc_name':
@@ -149,6 +173,19 @@ for biosample in root:
                     localenvironments.append(mystrip(label.text))
                 if labelattrib['harmonized_name']=='env_medium': #environmental medium
                     environmentalmediums.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='project_name': 
+                    projectnames.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='culture_collection': 
+                    culturecollections.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='biomaterial_provider': 
+                    biomaterialproviders.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='ref_biomaterial': 
+                    biomaterialrefs.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='specimen_voucher': 
+                    specimenvouchers.append(mystrip(label.text))
+                if labelattrib['harmonized_name']=='reference_material': 
+                    refmaterials.append(mystrip(label.text))
+                    
 
     if len(dates)==0:
         dates.append('-')
@@ -156,6 +193,10 @@ for biosample in root:
         hosts.append('-')
     if len(sources)==0:
         sources.append('-')
+    if len(samplenames)==0:
+        samplenames.append('-')
+    if len(strains)==0:
+        strains.append('-')
     if len(sampletypes)==0:
         sampletypes.append('-')        
     if len(locations)==0:
@@ -168,8 +209,20 @@ for biosample in root:
         localenvironments.append('-')
     if len(environmentalmediums)==0:
         environmentalmediums.append('-')
-#17
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,models[0],packages[0],'; '.join(titles),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums))
+    if len(projectnames)==0:
+        projectnames.append('-')
+    if len(culturecollections)==0:
+        culturecollections.append('-')
+    if len(biomaterialproviders)==0:
+        biomaterialproviders.append('-')
+    if len(biomaterialrefs)==0:
+        biomaterialrefs.append('-')
+    if len(specimenvouchers)==0:
+        specimenvouchers.append('-')
+    if len(refmaterials)==0:
+        refmaterials.append('-')
+        
+    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,samplenameidentifier,models[0],packages[0],'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(samplenames),'; '.join(strains),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums),'; '.join(projectnames),'; '.join(culturecollections),'; '.join(biomaterialproviders),'; '.join(biomaterialrefs),'; '.join(specimenvouchers),'; '.join(refmaterials))
 
 
 #write missing accessions to file
