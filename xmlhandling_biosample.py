@@ -45,6 +45,20 @@ for biosample in root:
     else:
         includedaccessions.append(accession)
     #print accession
+    #get dates and accession id number
+    lastupdatedate='-'
+    publicationdate='-'
+    submissiondate='-'
+    accessionnumber='-'
+    biosampleattrib=biosample.attrib
+    if 'last_update' in biosampleattrib:
+        lastupdatedate=mystrip(biosampleattrib['last_update'])
+    if 'publication_date' in biosampleattrib:
+        publicationdate=mystrip(biosampleattrib['publication_date'])
+    if 'submission_date' in biosampleattrib:
+        submissiondate=mystrip(biosampleattrib['submission_date'])
+    if 'id' in biosampleattrib:
+        accessionnumber=mystrip(biosampleattrib['id'])
     #get sample name (under identifier tag) (there may also be sample name provided as attribute - see below)
     samplenamenode=biosample.find('./Ids/Id[@db_label="Sample name"]')
     if samplenamenode!=None:
@@ -222,7 +236,7 @@ for biosample in root:
     if len(refmaterials)==0:
         refmaterials.append('-')
         
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,samplenameidentifier,models[0],packages[0],'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(samplenames),'; '.join(strains),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums),'; '.join(projectnames),'; '.join(culturecollections),'; '.join(biomaterialproviders),'; '.join(biomaterialrefs),'; '.join(specimenvouchers),'; '.join(refmaterials))
+    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(samplenames),'; '.join(strains),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums),'; '.join(projectnames),'; '.join(culturecollections),'; '.join(biomaterialproviders),'; '.join(biomaterialrefs),'; '.join(specimenvouchers),'; '.join(refmaterials))
 
 
 #write missing accessions to file

@@ -16,7 +16,7 @@ mkdir -p "${outdir}"
 > "${outdir}/biosamplemetadata.tsv"
 > "${outdir}/missingaccessions.txt"
 
-echo -e "Accession\tSampleNameIdentifier\tModel\tPackage\tDescription\tComment\tTaxonomyID\tTaxonomyName\tOrganismName\tAffiliationName\tContactEmail\tContactFirstName\tContactLastName\tCollectionDate\tHost\tIsolationSource\tSampleName\tStrain\tSampleType\tGeographicLocation\tLatitudeLongitude\tBroadScaleEnvironmentalContext\tLocalScaleEnvironmentalContext\tEnvironmentalMedium\tProjectName\tCultureCollection\tBiomaterialProvider\tBiomaterialReference\tSpecimenVoucher\tReferenceMaterial" >> "${outdir}/biosamplemetadata.tsv"
+echo -e "Accession\tAccessionIDNumber\tSampleNameIdentifier\tModel\tPackage\tLastUpdateDate\tPublicationDate\tSubmissionDate\tDescription\tComment\tTaxonomyID\tTaxonomyName\tOrganismName\tAffiliationName\tContactEmail\tContactFirstName\tContactLastName\tCollectionDate\tHost\tIsolationSource\tSampleName\tStrain\tSampleType\tGeographicLocation\tLatitudeLongitude\tBroadScaleEnvironmentalContext\tLocalScaleEnvironmentalContext\tEnvironmentalMedium\tProjectName\tCultureCollection\tBiomaterialProvider\tBiomaterialReference\tSpecimenVoucher\tReferenceMaterial" >> "${outdir}/biosamplemetadata.tsv"
 
 #rm -f testbiosample.xml
 

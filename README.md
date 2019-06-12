@@ -55,8 +55,9 @@ When nucleotide accessions are provided, the following fields are extracted:
 __Biosample metadata__
 
 When biosample accessions are provided, the following fields are extracted:
-* Identifiers: `Accession`, `Sample name`
+* Identifiers: `Accession`, `Accession ID`, `Sample name`
 * Submission data: `Model`, `Package`
+* Dates: `last_update`, `publication_date`, `submission_date` 
 * `Description`
 * `Comment`
 * Taxonomic data: `taxonomy_id`, `taxonomy_name`, `OrganismName`
