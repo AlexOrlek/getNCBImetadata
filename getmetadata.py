@@ -23,7 +23,9 @@ parser.add_argument('-a','--accessions', help='Text file with column containing 
 parser.add_argument('-t','--accessiontype', help='Type of accession (either nucleotide or biosample) (required)', choices=['nucleotide','biosample'], required=True, type=str)
 parser.add_argument('-o','--out', help='Output directory (required)', required=True, type=str)
 parser.add_argument('-b','--batchsize', help='Number of accession metadata records to retrieve per edirect query (default: 100; min: 2; max: 100)', default=100, type=batchsizeint)
-parser.add_argument('-e','--emailaddress', help="User's email address which will be provided as an argument to edirect econtact -email", required=True, type=str)
+parser.add_argument('-e','--emailaddress', help="User's email address which will be provided as an argument to edirect econtact -email (required)", required=True, type=str)
+parser.add_argument('--biosampleattributes', help="Path to file containing column of harmonized names of biosample attributes to be retrieved (not required)", required=False, type=str)
+
 #parser.add_argument('--noaccessionversions', action='store_true', help='If flag provided, this specifies that input accessions do not include the .version suffix (default: input accessions must be in the formataccession.version')
 
 args = parser.parse_args()
@@ -63,12 +65,22 @@ if args.accessiontype=='nucleotide':
         print('Error: unknown accession format')
         sys.exit()
 
-    
+#if biosample input check whether a biosample attributes file has been provided
+
+if args.biosampleattributes==None:
+    attributefilepresent='False'
+    attributefilepath='NA'
+else:
+    attributefilepresent='True'
+    attributefilepath=str(args.biosampleattributes)
+
+
+
             
 if args.accessiontype=='nucleotide':
     runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
 elif args.accessiontype=='biosample':
-    runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir])
+    runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
 else:
     print('invalid accession type')
     sys.exit()

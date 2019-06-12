@@ -9,7 +9,17 @@ sys.stdout = UTF8Writer(sys.stdout)
 accessions=sys.argv[1]
 accessions=accessions.split(',') #biosample accessions
 outdir=sys.argv[2]
+attributefilepresent=sys.argv[3]
 
+attributes=[]
+if attributefilepresent=='True':
+    attributefile=sys.argv[4]
+    with open(attributefile) as f:
+        for line in f:
+            data=line.strip().split('\t')
+            attribute=data[0].strip()
+            attributes.append(data[0])
+    
 
 tree=etree.parse(stdin)
 root=tree.getroot()
@@ -139,106 +149,40 @@ for biosample in root:
     if len(lastnames)==0:
         lastnames.append('-')
     ###extract metadata attributes
-    dates=[]
-    hosts=[]
-    sources=[]
-    samplenames=[]#
-    strains=[]#
-    sampletypes=[]
-    locations=[]
-    latlons=[]
-    broadenvironments=[]
-    localenvironments=[]
-    environmentalmediums=[]
-    projectnames=[]#
-    culturecollections=[]
-    biomaterialproviders=[]
-    biomaterialrefs=[]
-    specimenvouchers=[]
-    refmaterials=[]
-    output=biosample.iterfind('.//Attributes')
-    for indx, out in enumerate(output):
-        try:
-            labels=out.findall('./Attribute')
-        except:
-            continue
-        for label in labels:
-            labelattrib=label.attrib
-            if 'harmonized_name' in labelattrib:
-                if labelattrib['harmonized_name']=='collection_date':
-                    dates.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='host':
-                    hosts.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='isolation_source':
-                    sources.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='sample_name':
-                    samplenames.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='strain':
-                    strains.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='sample_type':
-                    sampletypes.append(mystrip(label.text))                
-                if labelattrib['harmonized_name']=='geo_loc_name':
-                    locations.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='lat_lon':
-                    latlons.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='env_broad_scale': #broad-scale environmental context
-                    broadenvironments.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='env_local_scale': #local-scale environmental context
-                    localenvironments.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='env_medium': #environmental medium
-                    environmentalmediums.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='project_name': 
-                    projectnames.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='culture_collection': 
-                    culturecollections.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='biomaterial_provider': 
-                    biomaterialproviders.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='ref_biomaterial': 
-                    biomaterialrefs.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='specimen_voucher': 
-                    specimenvouchers.append(mystrip(label.text))
-                if labelattrib['harmonized_name']=='reference_material': 
-                    refmaterials.append(mystrip(label.text))
-                    
+    if len(attributes)>0:
+        #initialise attribute dictionary
+        attributedict={}
+        for attribute in attributes:
+            attributedict[attribute]=[]
+        #append attributes to dictionary if present
+        output=biosample.iterfind('.//Attributes')
+        for indx, out in enumerate(output):
+            try:
+                labels=out.findall('./Attribute')
+            except:
+                continue
+            for label in labels:
+                labelattrib=label.attrib
+                if 'harmonized_name' in labelattrib:
+                    for attribute in attributes:
+                        if labelattrib['harmonized_name']==attribute:
+                            attributedict[attribute].append(mystrip(label.text))
+        #gather output
+        attributeoutputlist=[]
+        for attribute in attributes:
+            values=attributedict[attribute]
+            if len(values)==0:
+                attributeoutputlist.append('-')
+            else:
+                attributeoutputlist.append(';'.join(values))
 
-    if len(dates)==0:
-        dates.append('-')
-    if len(hosts)==0:
-        hosts.append('-')
-    if len(sources)==0:
-        sources.append('-')
-    if len(samplenames)==0:
-        samplenames.append('-')
-    if len(strains)==0:
-        strains.append('-')
-    if len(sampletypes)==0:
-        sampletypes.append('-')        
-    if len(locations)==0:
-        locations.append('-')
-    if len(latlons)==0:
-        latlons.append('-')
-    if len(broadenvironments)==0:
-        broadenvironments.append('-')
-    if len(localenvironments)==0:
-        localenvironments.append('-')
-    if len(environmentalmediums)==0:
-        environmentalmediums.append('-')
-    if len(projectnames)==0:
-        projectnames.append('-')
-    if len(culturecollections)==0:
-        culturecollections.append('-')
-    if len(biomaterialproviders)==0:
-        biomaterialproviders.append('-')
-    if len(biomaterialrefs)==0:
-        biomaterialrefs.append('-')
-    if len(specimenvouchers)==0:
-        specimenvouchers.append('-')
-    if len(refmaterials)==0:
-        refmaterials.append('-')
+    #write to file
+    if len(attributes)>0:
+        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'\t'.join(attributeoutputlist))
+    else:
+        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0])
+
         
-    print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'; '.join(dates),'; '.join(hosts),'; '.join(sources),'; '.join(samplenames),'; '.join(strains),'; '.join(sampletypes),'; '.join(locations),'; '.join(latlons),'; '.join(broadenvironments),'; '.join(localenvironments),'; '.join(environmentalmediums),'; '.join(projectnames),'; '.join(culturecollections),'; '.join(biomaterialproviders),'; '.join(biomaterialrefs),'; '.join(specimenvouchers),'; '.join(refmaterials))
-
-
 #write missing accessions to file
 
 missingaccessions=list(set(accessions).difference(set(includedaccessions)))

@@ -29,13 +29,24 @@ You should find the getmetadata.py executable script within the repository direc
 
 # Quick start
 
-Metadata can be retrieved by running the following code:
+The `-t` flag specifies whether `nucleotide` or	`biosample` accessions are provided in accessions.txt.<br>
+The `-e` flag should be your own email address; this is provided to NCBI so that they can monitor usage.<br>
+accessions.txt is a text file where the first column contains NCBI (nucleotide or biosample) accession ids.<br>
+
+
+Nucleotide metadata can be retrieved by running the following code:
 
 `getmetadata.py -a accessions.txt -t nucleotide -o outdir -e first.last@company.com`
 
-accessions.txt is a text file where the first column contains NCBI accession ids. Either Refseq or Genbank nucleotide accessions can be provided. Nucleotide accessions can be provided in either "accession" or "accession.version" format.<br>
-The `-t` flag specifies whether `nucleotide` or	`biosample` accessions are provided in accessions.txt.<br>
-The `-e` flag should be your own email address; this is provided to NCBI so that they can monitor usage.
+Either Refseq or Genbank nucleotide accessions can be provided. Nucleotide accessions can be provided in either "accession" or "accession.version" format.<br>
+
+
+BioSample metadata can be retrieved by running the following code:
+
+`getmetadata.py -a accessions.txt -t biosample -o outdir -e first.last@company.com --biosampleattributes attributes.txt`
+
+The `--biosampleattributes` flag is optional. It is used to specify a path to a file containing harmonized attribute names in the first column. A full list of BioSample attribute harmonized names is provided [here](https://www.ncbi.nlm.nih.gov/biosample/docs/attributes/). The specified attributes will be retrieved, in addition to default retrieved fields (see [Output](#Output) for details).<br>
+
 
 # Output
 
@@ -58,11 +69,11 @@ When biosample accessions are provided, the following fields are extracted:
 * Identifiers: `Accession`, `Accession ID`, `Sample name`
 * Submission data: `Model`, `Package`
 * Dates: `last_update`, `publication_date`, `submission_date` 
-* `Description`
+* `Title`
 * `Comment`
 * Taxonomic data: `taxonomy_id`, `taxonomy_name`, `OrganismName`
 * Affiliation data: `Owner/Name`, `email`, `Contact/Name/First`, `Contact/Name/Last`
-* Attribute data: `collection_date`, `host`, `isolation_source`, `sample_name`, `strain`, `sample_type`, `geo_loc_name`, `lat_lon`, `env_broad_scale`,`env_local_scale`,`env_medium`, `project_name`, `culture_collection`, `biomaterial_provider`, `ref_biomaterial`, `specimen_voucher`, `reference_material`<br>
+* Attribute data will be retrieved if a file containing harmonized attribute names is provided to the `--biosampleattributes` flag.
 
 
 # License
