@@ -73,6 +73,18 @@ if args.biosampleattributes==None:
 else:
     attributefilepresent='True'
     attributefilepath=str(args.biosampleattributes)
+    #check all provided attribute names are valid (listed in attributenames.tsv)
+    attributes=[]
+    with open('%s/attributenames.tsv'%sourcedir) as f:
+        for line in f:
+            attribute=line.strip().split('\t')[0]
+            attributes.append(attribute)
+    with open(attributefilepath) as f:
+        for line in f:
+            attribute=line.strip().split('\t')[0]
+            if attribute not in attributes:
+                sys.exit('Harmonized attribute name: %s is invalid (not listed in attributenames.tsv)'%attribute)
+            
 
 
 
