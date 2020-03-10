@@ -46,7 +46,7 @@ def runsubprocess(args,stderrpath=None, stdoutpath=None, writefile=None,shell=Fa
                 p=subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             stdout, stderr= p.communicate()
             try:
-                if stdout and verbose==True: #if stdout not empty...
+                if stdout: #if stdout not empty...  #removed "and verbose==True" (always useful to show stdout)
                     print('{}'.format(stdout.decode()))
             except:
                 pass
@@ -73,7 +73,7 @@ def runsubprocess(args,stderrpath=None, stdoutpath=None, writefile=None,shell=Fa
                     p=subprocess.Popen(args,stdout=stdout, stderr=subprocess.PIPE, shell=True)
                 stdout, stderr= p.communicate()
                 try:
-                    if stdout and verbose==True:
+                    if stdout:
                         print('{}'.format(stdout.decode()))
                 except:
                     pass
