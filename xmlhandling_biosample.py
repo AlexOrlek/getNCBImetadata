@@ -3,8 +3,9 @@ import xml.etree.cElementTree as etree
 import codecs
 import sys
 
-UTF8Writer = codecs.getwriter('utf8')
-sys.stdout = UTF8Writer(sys.stdout)
+if sys.version_info < (3, 0):
+    UTF8Writer = codecs.getwriter('utf8')
+    sys.stdout = UTF8Writer(sys.stdout)
 
 accessions=sys.argv[1]
 accessions=accessions.split(',') #biosample accessions
@@ -54,7 +55,7 @@ for biosample in root:
         continue
     else:
         includedaccessions.append(accession)
-    #print accession
+    #print(accession)
     #get dates and accession id number
     lastupdatedate='-'
     publicationdate='-'
@@ -178,9 +179,9 @@ for biosample in root:
 
     #write to file
     if len(attributes)>0:
-        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'\t'.join(attributeoutputlist))
+        print('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0],'\t'.join(attributeoutputlist)))
     else:
-        print '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0])
+        print('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(accession,accessionnumber,samplenameidentifier,models[0],packages[0],lastupdatedate,publicationdate,submissiondate,'; '.join(titles),'; '.join(comments),'; '.join(taxids),'; '.join(taxnames),'; '.join(orgnames),owners[0],emails[0], firstnames[0],lastnames[0]))
 
         
 #write missing accessions to file

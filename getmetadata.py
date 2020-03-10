@@ -90,9 +90,13 @@ else:
 
             
 if args.accessiontype=='nucleotide':
+    print('retrieving nucleotide accession metadata from NCBI')
     runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
 elif args.accessiontype=='biosample':
+    print('retrieving biosample accession metadata from NCBI')
     runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
 else:
     print('invalid accession type')
     sys.exit()
+
+print('Finished!')
