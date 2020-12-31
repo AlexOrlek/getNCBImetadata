@@ -207,7 +207,7 @@ for seqset in root:
                 sourcetaxid=mystrip(out.text)
 
 
-        print('%s'%'\t'.join(accessionversion,createdate,updatedate,moleculetype,length,completeness,sourcegenome,sourcetaxon,sourcetaxid,';'.join(assemblymethods),';'.join(coverages),'; '.join(seqtechs),';'.join(annotationpipelines),'|'.join(';'.join(annotationversions),';'.join(annotationmethods)),';'.join(bioprojects),';'.join(biosamples),';'.join(sras),';'.join(assemblys),'; '.join(pmids)))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry (title)
+        print('%s'%'\t'.join([accessionversion,createdate,updatedate,moleculetype,length,completeness,sourcegenome,sourcetaxon,sourcetaxid,';'.join(assemblymethods),';'.join(coverages),'; '.join(seqtechs),';'.join(annotationpipelines),'|'.join([';'.join(annotationversions),';'.join(annotationmethods)]),';'.join(bioprojects),';'.join(biosamples),';'.join(sras),';'.join(assemblys),'; '.join(pmids)]))  #';'.join is used to capture cases where there are multiple entries that may be of interest; in other cases I'm only ever interested in one entry (title)
 
 missingaccessions=list(set(accessions).difference(set(includedaccessions)))
 if len(missingaccessions)>0:
