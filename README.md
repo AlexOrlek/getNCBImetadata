@@ -12,9 +12,10 @@ Retrieves NCBI metadata from [nucleotide](https://www.ncbi.nlm.nih.gov/nucleotid
 
 # Requirements
 
-* Linux or MacOS (with the [Bash shell](https://en.wikibooks.org/wiki/Bash_Shell_Scripting#What_is_Bash?), which is the default shell on MacOS and many Linux distributions)
+* Linux or MacOS or Windows with Windows Subsystem for Linux ([WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10)) installed
+* [Bash shell](https://en.wikibooks.org/wiki/Bash_Shell_Scripting#What_is_Bash?), which is the default shell on MacOS and many Linux distributions
 * [Python](https://www.python.org/) 2.7 or Python 3
-* [edirect](https://www.ncbi.nlm.nih.gov/books/NBK179288/)
+* [Edirect](https://www.ncbi.nlm.nih.gov/books/NBK179288/)
 * A computer with internet access via the HTTPS protocol - required for retrieving data from NCBI<br>
 
 
