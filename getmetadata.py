@@ -1,5 +1,5 @@
-#!/usr/bin/env python                                                                                                                                                                                              
-import argparse, os, sys, subprocess, signal
+#!/usr/bin/env python                                                                                                                                                                       
+import argparse, os, sys, signal
 sourcedir=os.path.dirname(os.path.abspath(__file__))
 cwdir=os.getcwd()
 sys.path.append(sourcedir)
@@ -91,10 +91,12 @@ else:
             
 if args.accessiontype=='nucleotide':
     print('retrieving nucleotide accession metadata from NCBI')
-    runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
+    runsubprocess(['python','%s/edirect_nucleotide.py'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
+    #runsubprocess(['bash','%s/edirect_nucleotide.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
 elif args.accessiontype=='biosample':
     print('retrieving biosample accession metadata from NCBI')
-    runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
+    #runsubprocess(['bash','%s/edirect_biosample.sh'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
+    runsubprocess(['python','%s/edirect_biosample.py'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
 else:
     print('invalid accession type')
     sys.exit()
