@@ -1,7 +1,7 @@
 #############Python modules
 
 ###wrapper for subprocess command
-def runsubprocess(args,verbose=False,shell=False,polling=False,printstdout=True,preexec_fn=None):
+def runsubprocess(args,verbose=False,shell=False,polling=True,printstdout=True,preexec_fn=None):
     """takes a subprocess argument list and runs Popen/communicate or Popen/poll() (if polling=True); if verbose=True, processname (string giving command call) is printed to screen (processname is always printed if a process results in error); errors are handled at multiple levels i.e. subthread error handling; fuction can be used fruitfully (returns stdout)"""
     #function setup
     import subprocess,sys,signal
