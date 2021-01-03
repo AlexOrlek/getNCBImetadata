@@ -1,5 +1,6 @@
 #!/usr/bin/env python                                                                                                                                                                       
-import argparse, os, sys, signal
+import argparse, os, sys, signal, time
+import pandas as pd
 sourcedir=os.path.dirname(os.path.abspath(__file__))
 cwdir=os.getcwd()
 sys.path.append(sourcedir)
@@ -68,10 +69,10 @@ if args.accessiontype=='nucleotide':
 #if biosample input check whether a biosample attributes file has been provided
 
 if args.biosampleattributes==None:
-    attributefilepresent='False'
+    attributefilepresent=False
     attributefilepath='NA'
 else:
-    attributefilepresent='True'
+    attributefilepresent=True
     attributefilepath=str(args.biosampleattributes)
     #check all provided attribute names are valid (listed in attributenames.tsv)
     attributes=[]
@@ -87,14 +88,79 @@ else:
             
 
 
+###run Edirect commands
 
-            
 if args.accessiontype=='nucleotide':
     print('retrieving nucleotide accession metadata from NCBI')
-    runsubprocess(['python','%s/edirect_nucleotide.py'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,accessiontype])
+
+    accessionsdf=pd.read_csv('%s'%str(args.accessions),header=None,sep='\t')
+    accessions=accessionsdf.iloc[:,0].tolist()
+
+    runsubprocess(['mkdir -p %s'%outputpath],shell=True)
+    f=open('%s/nucleotidemetadata.tsv'%outputpath,'w')
+    f.write('Accession\tCreateDate\tUpdateDate\tMoleculeType\tLength\tCompleteness\tSourceGenomeType\tSourceTaxon\tSourceTaxID\tAssemblyMethod\tGenomeCoverage\tSequencingTechnology\tAnnotationPipeline\tAnnotationMethod\tBioprojectAccession\tBiosampleAccession\tSRAAccession\tAssemblyAccession\tPubMedID\n')
+    f.close()
+    f=open('%s/missingaccessions.txt'%outputpath,'w')
+    f.close()
+
+    accessionslen=len(accessions)
+    chunklen=int(args.batchsize)
+
+    runsubprocess(['econtact -email %s -tool nucleotidemetadatadownload'%str(args.emailaddress)],shell=True)
+
+    for i in range(0,accessionslen,chunklen):
+        start=i+1
+        print(start)
+        stop=i+chunklen
+        if(stop>accessionslen):
+            stop=accessionslen
+        #slice accessions list
+        chunkedaccessionsstring=','.join(accessions[i:i+chunklen])
+        #run edirect command
+        sedcommand='sed -n "%s,%s"p "%s"'%(start,stop,str(args.accessions))
+        runsubprocess(['%s | epost -db nuccore -format acc | efetch -format xml | python %s/xmlhandling_nucleotide.py %s %s %s >> %s/nucleotidemetadata.tsv'%(sedcommand,sourcedir,chunkedaccessionsstring,outputpath,accessiontype,outputpath)],shell=True)
+        #sleep
+        time.sleep(1)
+
 elif args.accessiontype=='biosample':
     print('retrieving biosample accession metadata from NCBI')
-    runsubprocess(['python','%s/edirect_biosample.py'%sourcedir,str(args.accessions),str(args.batchsize),str(args.emailaddress),outputpath,sourcedir,attributefilepresent,attributefilepath])
+
+    accessionsdf=pd.read_csv('%s'%str(args.accessions),header=None,sep='\t')
+    accessions=accessionsdf.iloc[:,0].tolist()
+
+    runsubprocess(['mkdir -p %s'%outputpath],shell=True)
+    f=open('%s/biosamplemetadata.tsv'%outputpath,'w')
+    header=['Accession','AccessionIDNumber','SampleNameIdentifier','Model','Package','LastUpdateDate','PublicationDate','SubmissionDate','Title','Comment','TaxonomyID','TaxonomyName','OrganismName','AffiliationName','ContactEmail','ContactFirstName','ContactLastName']
+    if attributefilepresent==True:
+        attributesdf=pd.read_csv('%s'%attributefilepath,header=None,sep='\t')
+        attributes=attributesdf.iloc[:,0].tolist()
+        header.extend(attributes)
+    f.write('%s\n'%'\t'.join(header))
+    f.close()
+    f=open('%s/missingaccessions.txt'%outputpath,'w')
+    f.close()
+
+    accessionslen=len(accessions)
+    chunklen=int(args.batchsize)
+
+    runsubprocess(['econtact -email %s -tool biosamplemetadatadownload'%str(args.emailaddress)],shell=True)
+
+    for i in range(0,accessionslen,chunklen):
+        start=i+1
+        print(start)
+        stop=i+chunklen
+        if(stop>accessionslen):
+            stop=accessionslen
+        #slice accessions list
+        chunkedaccessionsstring=','.join(accessions[i:i+chunklen])
+        #run edirect command
+        sedcommand='sed -n "%s,%s"p "%s"'%(start,stop,str(args.accessions))
+        if attributefilepresent==True:
+            runsubprocess(['%s | epost -db biosample -format acc | efetch -format xml | python %s/xmlhandling_biosample.py %s %s %s %s >> %s/biosamplemetadata.tsv'%(sedcommand,sourcedir,chunkedaccessionsstring,outputpath,attributefilepresent,attributefilepath,outputpath)],shell=True)
+        else:
+            runsubprocess(['%s | epost -db biosample -format acc | efetch -format xml | python %s/xmlhandling_biosample.py %s %s %s >> %s/biosamplemetadata.tsv'%(sedcommand,sourcedir,chunkedaccessionsstring,outputpath,attributefilepresent,outputpath)],shell=True)
+        #sleep
+        time.sleep(1)
 else:
     print('invalid accession type')
     sys.exit()
