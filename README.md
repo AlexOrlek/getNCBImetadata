@@ -1,4 +1,6 @@
 # getNCBImetadata
+[![DOI](https://zenodo.org/badge/177838141.svg)](https://zenodo.org/badge/latestdoi/177838141)
+
 Retrieves NCBI metadata from [nucleotide](https://www.ncbi.nlm.nih.gov/nucleotide/) or [biosample](https://www.ncbi.nlm.nih.gov/biosample/) accession ids.
 
 # Table of contents
